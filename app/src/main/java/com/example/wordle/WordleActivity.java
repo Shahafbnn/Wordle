@@ -2,6 +2,7 @@ package com.example.wordle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,10 +15,11 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
 {
 
     private Button[] buttonsLetters;
-    private Button buttonEnter,buttonDelete;
+    private Button buttonEnter,buttonDelete,buttonRestart,buttonState;
     private Button[][] wordle;
     private GameManager gm;
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -46,12 +48,16 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
 
         this.buttonEnter = findViewById(R.id.buttonEnter);
         this.buttonDelete = findViewById(R.id.buttonDelete);
+        this.buttonRestart = findViewById(R.id.buttonRestart);
+        this.buttonState = findViewById(R.id.buttonState);
+
 
         for (Button button: this.buttonsLetters)
             button.setOnClickListener(this);
 
         this.buttonEnter.setOnClickListener(this);
-        buttonDelete.setOnClickListener(this);
+        this.buttonDelete.setOnClickListener(this);
+        this.buttonRestart.setOnClickListener(this);
 
         tests();
 
@@ -96,6 +102,9 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
             buttonsLetter.setBackgroundColor(getResources().getColor(R.color.light_grey));
             buttonsLetter.setClickable(true);
         }
+        this.buttonState.setVisibility(View.INVISIBLE);
+        this.enableKeyboard();
+
 
     }
 
@@ -106,9 +115,9 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
         }
         for(int x = 0; x < this.wordle[gm.getAttempts()].length; x++){
             if(guessed[x] == 0) {
-                this.wordle[gm.getAttempts()][x].setBackgroundColor(getResources().getColor(R.color.light_grey));
+                this.wordle[gm.getAttempts()][x].setBackgroundColor(getResources().getColor(R.color.dark_grey));
                 Log.e("updateLettersID", "the ID: " + findViewById(getResources().getIdentifier("button" + (gm.getCurrentGuess().charAt(x)), "id", getPackageName())));
-                findViewById(getResources().getIdentifier("button" + (gm.getCurrentGuess().charAt(x)), "id", getPackageName())).setBackgroundColor(getResources().getColor(R.color.light_grey));
+                findViewById(getResources().getIdentifier("button" + (gm.getCurrentGuess().charAt(x)), "id", getPackageName())).setBackgroundColor(getResources().getColor(R.color.dark_grey));
             }
             else if(guessed[x] == 1) {
                 this.wordle[gm.getAttempts()][x].setBackgroundColor(getResources().getColor(R.color.yellow));
@@ -123,12 +132,37 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+    private void gameEnd(){
+        if(gm.getGameStatus() == 'V') {
+            this.buttonState.setText("You won! \n RESTART to try again!");
+            this.disableKeyboard();
+            this.buttonState.setVisibility(View.VISIBLE);
+        }
+        else if(gm.getGameStatus() == 'L') {
+            this.buttonState.setText("You lost! \n RESTART to try again!");
+            this.disableKeyboard();
+            this.buttonState.setVisibility(View.VISIBLE);
+        }
+
+    }
+
     private void disableKeyboard(){
         for (Button buttonsLetter : this.buttonsLetters) {
             buttonsLetter.setClickable(false);
         }
+        buttonEnter.setClickable(false);
+        buttonDelete.setClickable(false);
+        //buttonRestart.setClickable(false);
     } // loops on all buttons in abc and sets
     //clickable=false (for end of game)
+    private void enableKeyboard(){
+        for (Button buttonsLetter : this.buttonsLetters) {
+            buttonsLetter.setClickable(true);
+        }
+        buttonEnter.setClickable(true);
+        buttonDelete.setClickable(true);
+        //buttonRestart.setClickable(true);
+    }
 
     public void changeButtonColor(Button button, int color){ //int red = getResources().getColor(R.color.red);
         button.setBackgroundColor(color);
@@ -159,13 +193,19 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
                     Log.e("onClick", "w1.checkWord(cg):" + Arrays.toString(w1.checkWord(cg)));
                     this.updateLetters(arrz);
                     gm.setAttempts(gm.getAttempts()+1);
+
+                    gm.updateGameStatus();
+                    this.gameEnd();
                 }
             }
             if (viewId == this.buttonDelete.getId()){
                 if(gm.getCurrentGuess().length() > 0) {
-                    this.wordle[gm.getAttempts()][gm.getCurrentGuess().length()].setText(" ");
+                    this.wordle[gm.getAttempts()][gm.getCurrentGuess().length() - 1].setText(" ");
                     gm.setCurrentGuess(gm.getCurrentGuess().substring(0, gm.getCurrentGuess().length() - 1));
                 }
+            }
+            if (viewId == this.buttonRestart.getId()){
+                gm.restart();
             }
             for (Button buttonsLetter : this.buttonsLetters) {
                 if (viewId == buttonsLetter.getId()) {
@@ -173,7 +213,7 @@ public class WordleActivity extends AppCompatActivity implements View.OnClickLis
                         this.wordle[gm.getAttempts()][gm.getCurrentGuess().length()].setText(buttonsLetter.getText());
                         gm.addCurrentGuess(buttonsLetter.getText().charAt(0));
                         Log.v("onClick", "buttonsLetters[i].getText(): " + buttonsLetter.getText());
-                        Log.v("onClick", "this.wordle[gm.getAttempts()][gm.num]:" + this.wordle[gm.getAttempts()][gm.num].getText());
+                        Log.v("onClicks", "this.wordle[gm.getAttempts()][gm.num]:" + this.wordle[gm.getAttempts()][gm.num].getText());
                     }
                     else if(gm.getCurrentGuess().length() >= 4){
                         gm.setCurrentGuess("");

@@ -18,6 +18,7 @@ public class GameManager {
     public GameManager(WordleActivity wordleUI){
         this.dictionary = new Dictionary();
         this.word = new Word(dictionary.getWord());
+        this.wordleUI = wordleUI;
         this.attempts = 0;
         this.status = 'P';
 
@@ -77,6 +78,7 @@ public class GameManager {
     void restart(){
         this.attempts = 0;
         this.status = 'P';
+        this.currentGuess = "";
         this.dictionary.restart();
         this.word.restart(dictionary.getWord());
         this.wordleUI.restart();
@@ -84,15 +86,21 @@ public class GameManager {
     and check how it should affect them. Remember to call the clear
     method in wordleUI.*/
     void checkWord(String guess){
-        wordleUI.updateLetters(word.checkWord(guess));
-        attempts++;
+        this.wordleUI.updateLetters(word.checkWord(guess));
+        this.attempts++;
 
     } /* Checks the word guessed by the
     user, and changes the properties accordingly. Remember to call the
     updateLetters method in wordleUI.*/
-    char getGameStatus(){return status;} /* returns the game status (in
+    char getGameStatus(){
+        return this.status;
+    } /* returns the game status (in
     progress/victory/loss).*/
 
+    void updateGameStatus(){
+        if(currentGuess.equals(this.word.secretWord)) this.setStatus('V');
+        else if(this.attempts >= 6) this.setStatus('L');
+    }
     int addCurrentGuess(char letter){
         if(this.currentGuess.length() < 5) {
             int i = 0;
