@@ -3,8 +3,9 @@ package com.example.wordle;
 import android.util.Log;
 
 public class Word {
+    String secretWord;
     private char[] wordArray;
-    public String secretWord;
+
 
     public Word(String secretWord){
         this.secretWord = secretWord;
@@ -18,8 +19,7 @@ public class Word {
     }
 
     public boolean check(char[] word){
-        if( word.equals(Dictionary.getWord().toCharArray()) )return true;
-        else return false;
+        return ( word.equals(Dictionary.getWord().toCharArray()) );
     }
 
     public int checkLetter(char letter, int index){
@@ -28,17 +28,17 @@ public class Word {
         else return 0;
     }
 
-    public int[] checkWord(char[] word){
+    int[] checkWord(String guess){
         Log.e("WordcheckWord", "secretWord: " + secretWord);
         //0 = incorrect letter,
         // 1 = correct letter & incorrect place,
         // 2 = correct letter & place
 
-        int[] checked = new int[Math.max(this.wordArray.length, word.length)];
+        int[] checked = new int[5];
         for(int i = 0; i < checked.length; i++){
             //if(secretWord == null) checked[i] = -1;
-             if(this.wordArray[i] == word[i]) checked[i] = 2;
-            else if(this.secretWord.indexOf(word[i]) >= 0) checked[i] = 1;
+            if(this.wordArray[i] == guess.charAt(i)) checked[i] = 2;
+            else if(this.secretWord.indexOf(guess.charAt(i)) >= 0) checked[i] = 1;
             else checked[i] = 0;
         }
         return checked;

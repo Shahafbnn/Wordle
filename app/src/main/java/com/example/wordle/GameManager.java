@@ -2,6 +2,8 @@ package com.example.wordle;
 
 import android.util.Log;
 
+import java.util.Arrays;
+
 public class GameManager {
     private Dictionary dictionary;
     private WordleActivity wordleUI;
@@ -10,8 +12,7 @@ public class GameManager {
     int num;
     private char status;
 
-    private char[] currentGuess;
-    private int currentGuessLast;
+    private String currentGuess;
 
 
     public GameManager(WordleActivity wordleUI){
@@ -20,11 +21,7 @@ public class GameManager {
         this.attempts = 0;
         this.status = 'P';
 
-        this.currentGuess = new char[5];
-        for(int i = 0; i < currentGuess.length; i++){
-            currentGuess[i] = ' ';
-        }
-        this.currentGuessLast = 0;
+        this.currentGuess = "";
 
     }
 
@@ -68,25 +65,18 @@ public class GameManager {
         this.status = status;
     }
 
-    public char[] getCurrentGuess() {
+    public String getCurrentGuess() {
         return currentGuess;
     }
 
-    public void setCurrentGuess(char[] currentGuess) {
+    public void setCurrentGuess(String currentGuess) {
         this.currentGuess = currentGuess;
     }
-    public int getCurrentGuessLast() {
-        return currentGuessLast;
-    }
 
-    public void setCurrentGuessLast(int currentGuessLast) {
-        this.currentGuessLast = currentGuessLast;
-    }
 
     void restart(){
         this.attempts = 0;
         this.status = 'P';
-        this.currentGuessLast = 0;
         this.dictionary.restart();
         this.word.restart(dictionary.getWord());
         this.wordleUI.restart();
@@ -94,7 +84,7 @@ public class GameManager {
     and check how it should affect them. Remember to call the clear
     method in wordleUI.*/
     void checkWord(String guess){
-        wordleUI.updateLetters(word.checkWord(guess.toCharArray()));
+        wordleUI.updateLetters(word.checkWord(guess));
         attempts++;
 
     } /* Checks the word guessed by the
@@ -104,16 +94,10 @@ public class GameManager {
     progress/victory/loss).*/
 
     int addCurrentGuess(char letter){
-        if(this.currentGuessLast < 5) {
-            this.currentGuessLast++;
+        if(this.currentGuess.length() < 5) {
             int i = 0;
-            while(i < this.currentGuess.length){
-                if(this.currentGuess[i] == ' ') {
-                    this.currentGuess[i] = letter;
-                    return 0;
-                }
-                i++;
-            }
+            this.currentGuess = this.currentGuess + letter;
+            return 0;
         }
         Log.d("currentGuess", "GameManager.addCurrentGuess: currentGuess is full.");
         return -1;
